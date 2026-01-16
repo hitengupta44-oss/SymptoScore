@@ -11,10 +11,12 @@ import Footer from "./components/footer"
 export default function App() {
   return (
     <>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+    </Routes>
       <Navbar />
 
       <Routes>
-        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
