@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
-import { Activity, Stethoscope, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { Activity, Stethoscope, AlertCircle, CheckCircle2, ArrowRight, Loader2 } from "lucide-react"
+import { supabase } from "../lib/supabase"
 
-// --- TYPES ---
-
+// --- TYPES (Same as before) ---
 interface RiskFactor {
   delta: number
   direction: "increased" | "reduced"
@@ -28,23 +28,67 @@ interface ApiResponse {
 const formatName = (str: string) => str.replace(/([A-Z])/g, ' $1').trim();
 
 const Results = () => {
+  const { id } = useParams() // Get ID from URL
   const location = useLocation()
   const navigate = useNavigate()
   
-  // 1. Properly type the location state
-  const reportData = location.state?.report as ApiResponse | undefined
-  
+  const [reportData, setReportData] = useState<ApiResponse | null>(null)
   const [selected, setSelected] = useState<DiseaseReport | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!reportData || !reportData.report) {
-      navigate("/")
-    } else {
-      setSelected(reportData.report[0])
-    }
-  }, [reportData, navigate])
+    const fetchReport = async () => {
+      // SCENARIO 1: Data passed via Navigation (Instant)
+      if (location.state?.report) {
+        setReportData(location.state.report)
+        setSelected(location.state.report.report[0])
+        setLoading(false)
+        return
+      }
 
-  if (!selected) return null
+      // SCENARIO 2: No state, but we have an ID (Fetch from Supabase)
+      if (id) {
+        try {
+          const { data, error } = await supabase
+            .from("health_reports")
+            .select("analysis_result")
+            .eq("id", id)
+            .single()
+
+          if (error || !data) {
+            console.error("Error fetching report:", error)
+            navigate("/") // Redirect if ID is invalid
+            return
+          }
+
+          // Supabase stores JSON, cast it to our type
+          const result = data.analysis_result as ApiResponse
+          setReportData(result)
+          setSelected(result.report[0])
+        } catch (err) {
+          console.error(err)
+          navigate("/")
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        // No ID and No State? Go home.
+        navigate("/")
+      }
+    }
+
+    fetchReport()
+  }, [id, location.state, navigate])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!selected || !reportData) return null
 
   return (
     <div className="min-h-screen bg-slate-100 p-6 flex justify-center">
@@ -62,7 +106,7 @@ const Results = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           <aside className="lg:col-span-4 space-y-3">
-            {reportData?.report.map((item) => (
+            {reportData.report.map((item) => (
               <button
                 key={item.disease}
                 onClick={() => setSelected(item)}
@@ -142,7 +186,7 @@ const Results = () => {
                   const isBad = factor.direction === "increased";
                   return (
                     <div key={idx} className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
-                      <div className={`w-3 h-3 rounded-full shrink-0 ${isBad ? 'bg-red-500' : 'bg-green-500'}`} />
+                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${isBad ? 'bg-red-500' : 'bg-green-500'}`} />
                       <div className="flex-1">
                         <span className="font-bold text-slate-800">
                           {formatName(factor.factor)}
