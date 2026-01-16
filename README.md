@@ -1,47 +1,47 @@
 # SymptoScore
 
-# AI-Based Health Risk Screening System
+## AI‑Based Health Risk Screening System
 
-An AI-driven health screening platform that estimates **early risk probabilities (not medical diagnoses)** for multiple chronic diseases using symptom, lifestyle, and family history data.
-The system promotes **proactive healthcare awareness** through explainable probabilistic modeling, early risk alerts, and **non-prescriptive preventive guidance**, including **suggested routine medical tests for high-risk cases**.
+SymptoScore is an AI‑driven health screening platform that estimates **early risk probabilities** (not medical diagnoses) for multiple chronic diseases using symptom, lifestyle, and family‑history data. The system promotes proactive healthcare awareness through explainable probabilistic modeling, early risk alerts, and **non‑prescriptive preventive guidance**, including suggested routine medical tests for high‑risk cases.
 
 ---
 
 ## Key Features
 
-* **Multi-Disease Risk Screening**
+### Multi‑Disease Risk Screening
 
-  * Diabetes
-  * Heart Disease
-  * Hypertension
-  * Chronic Kidney Disease (CKD)
-  * Asthma
-  * Dyslipidemia
-  * Anemia
+* Diabetes
+* Heart Disease
+* Hypertension
+* Chronic Kidney Disease (CKD)
+* Asthma
+* Dyslipidemia
+* Anemia
 
-* **Risk Probability Output**
+### Risk Probability Output
 
-  * Disease-wise risk scores between **0–100%**
-  * Clear classification: Low / Moderate / High Risk
+* Disease‑wise risk scores between **0–100%**
+* Clear classification: **Low / Moderate / High Risk**
 
-* **High-Risk Alerts**
+### High‑Risk Alerts
 
-  * Automatic alerts for elevated risk scores
-  * Preventive lifestyle recommendations
-  * Suggested routine screening tests (informational only, not medical advice)
+* Automatic alerts for elevated risk scores
+* Preventive lifestyle recommendations
+* Suggested routine screening tests *(informational only, not medical advice)*
 
-* **Explainable AI**
+### Explainable AI
 
-  * Bayesian Network–based causal reasoning
-  * Transparent probabilistic factor influence
-  * Interpretable decision paths
+* Bayesian Network–based causal reasoning
+* Transparent probabilistic factor influence
+* Interpretable decision paths
 
-* **Persistent Data Storage**
+### Persistent Data Storage
 
-  * Survey responses
-  * Risk predictions
-  * Alert history
-    Stored securely in **Supabase (SQL-backed database)**
+* Survey responses
+* Risk predictions
+* Alert history
+
+All data is stored securely in **Supabase (SQL‑backed PostgreSQL database)** with access control policies.
 
 ---
 
@@ -49,7 +49,7 @@ The system promotes **proactive healthcare awareness** through explainable proba
 
 ### Hybrid Probabilistic Ensemble
 
-The system uses a **hybrid ensemble of Naive Bayes and Bayesian Networks**:
+The system uses a hybrid ensemble of **Naive Bayes** and **Bayesian Networks**:
 
 | Model            | Role                                                                              |
 | ---------------- | --------------------------------------------------------------------------------- |
@@ -60,25 +60,60 @@ This approach ensures:
 
 * Interpretability
 * Robust uncertainty handling
-* Efficiency suitable for real-world screening
+* Efficiency suitable for real‑world screening
+
+---
+
+## System Architecture & Platform Design
+
+The platform follows a **modular, service‑oriented architecture** separating user‑facing systems from the machine‑learning inference layer.
+
+### Frontend Application
+
+* Built using a modern React‑based stack
+* Secure user authentication via Supabase Auth
+* Guided, multi‑step health survey experience
+* Clear risk‑vs‑diagnosis communication
+* Visual risk summaries and explainability views
+* User history dashboard for past screenings
+
+### Backend & Application Logic
+
+* Powered by **Supabase** as the core backend platform
+* Handles authentication, authorization, and secure data access
+* Implements Row Level Security (RLS) to ensure users can only access their own health data
+* Backend logic orchestrates survey submission, validation, risk processing, alert creation, and result delivery
+
+### ML Service Integration
+
+* Machine‑learning models are deployed as an **independent inference service**
+* Backend communicates with the ML service via secure HTTP APIs
+* Enables independent scaling, model updates, and versioning without impacting the user‑facing system
+
+### Scalability & Reliability Considerations
+
+* Stateless backend design for horizontal scaling
+* Isolation of ML inference service to avoid system‑wide bottlenecks
+* Structured data storage enables analytics, auditing, and future model improvement
+* Architecture supports future enhancements such as caching, async processing, and alert pipelines
 
 ---
 
 ## System Workflow
 
-1. User inputs symptoms, lifestyle habits, and family history
-2. Feature encoding and preprocessing
-3. Risk estimation using Naive Bayes and Bayesian Network inference
-4. Disease-wise risk score generation (0–100%)
-5. Explainability through probabilistic factor contributions
-6. High-risk alerts with lifestyle guidance and suggested routine tests
-7. Secure storage of inputs and results in Supabase
+1. User signs in and completes a health screening survey
+2. Survey responses are validated and securely stored
+3. Backend forwards encoded features to the ML inference service
+4. Disease‑wise risk scores (0–100%) are generated
+5. Probabilistic factor contributions are returned for explainability
+6. High‑risk cases trigger alerts and preventive guidance
+7. Results and alerts are persisted in Supabase for future reference
 
 ---
 
-## Suggested Routine Screening Tests (High-Risk Cases)
+## Suggested Routine Screening Tests (High‑Risk Cases)
 
-For users identified with **high estimated risk**, the system may suggest **commonly recommended routine screening tests** for awareness purposes:
+For users identified with high estimated risk, the system may suggest commonly recommended routine screening tests for **awareness purposes only**:
 
 | Disease       | Suggested Test (Informational)    |
 | ------------- | --------------------------------- |
@@ -95,21 +130,31 @@ For users identified with **high estimated risk**, the system may suggest **comm
 ## Responsible AI and Ethical Design
 
 * This system is **not a diagnostic tool**
-* Designed strictly for **early risk screening and health awareness**
-* Emphasizes transparency and interpretability
+* Designed strictly for early risk screening and health awareness
+* Clear separation between medical advice and informational guidance
+* Emphasis on transparency, interpretability, and user trust
 * Supports responsible and ethical AI deployment in healthcare contexts
 
 ---
 
 ## Tech Stack
 
+### Machine Learning
+
 * Python
-* Scikit-learn (Naive Bayes)
+* Scikit‑learn (Naive Bayes)
 * pgmpy (Bayesian Networks and inference)
 * Pandas, NumPy
-* Supabase (PostgreSQL-based storage)
+
+### Platform & Engineering
+
+* Supabase (PostgreSQL, Auth, Row Level Security)
+* Serverless backend functions for orchestration
+* Secure API‑based integration with ML inference service
+* Modern React‑based frontend
+
 ---
 
 ## Impact
 
-By enabling early risk awareness, transparent AI reasoning, and preventive health insights, this project aims to support proactive healthcare behavior and reduce long-term disease burden.
+By combining explainable probabilistic AI with a secure, scalable, and user‑centric system design, SymptoScore enables early health risk awareness, supports preventive healthcare behavior, and demonstrates a production‑ready approach to responsible health‑tech deployment.
