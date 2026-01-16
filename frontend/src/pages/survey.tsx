@@ -15,7 +15,7 @@ interface Question {
   options?: string[]
 }
 
-// Define the shape of the data we send to Python
+// Define the shape of the data we send to Python (keys are strings, values are string or number)
 interface SurveyAnswers {
   [key: string]: string | number
 }
@@ -50,6 +50,8 @@ const questions: Question[] = [
 
 const Survey = () => {
   const navigate = useNavigate()
+  
+  // State Management
   const [index, setIndex] = useState<number>(0)
   const [answers, setAnswers] = useState<SurveyAnswers>({})
   const [ageInput, setAgeInput] = useState<string>("") 
@@ -57,18 +59,21 @@ const Survey = () => {
 
   const current = questions[index]
 
-  // === CORE LOGIC ===
+  // === CORE SUBMISSION LOGIC ===
   const submitSurvey = async (finalData: SurveyAnswers) => {
     setIsSubmitting(true)
     try {
+      // 1. Get Current User
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
         alert("Please login to save results")
-        navigate("/login")
+        navigate("/login") // Adjust route if needed
         return
       }
 
+      // 2. Call Your Python API
+      // Ensure your Flask backend is running on this port
       const response = await fetch("http://127.0.0.1:5000/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,49 +81,67 @@ const Survey = () => {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to analyze data")
+        throw new Error("Failed to analyze data from API")
       }
 
       const reportData = await response.json()
 
-      const { error } = await supabase.from("health_reports").insert({
-        user_id: user.id,
-        input_data: finalData,
-        analysis_result: reportData
-      })
+      // 3. Save Input + Report to Supabase AND Return the new ID
+      // We use .select().single() to get the newly created row back immediately
+      const { data: insertedRecord, error } = await supabase
+        .from("health_reports")
+        .insert({
+          user_id: user.id,
+          input_data: finalData,
+          analysis_result: reportData
+        })
+        .select()
+        .single()
 
       if (error) throw error
 
-      navigate("/results", { state: { report: reportData } })
+      if (!insertedRecord) {
+        throw new Error("Record saved but no ID returned")
+      }
 
-    } catch (error) {
-      console.error("Error:", error)
-      alert("Something went wrong. Please check console.")
+      // 4. Redirect to Results with the specific ID
+      // We pass reportData in state so the next page doesn't have to fetch immediately
+      navigate(`/results/${insertedRecord.id}`, { state: { report: reportData } })
+
+    } catch (error: any) {
+      console.error("Error submitting survey:", error)
+      alert(error.message || "Something went wrong. Please check console.")
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  // === NAVIGATION LOGIC ===
   const nextStep = (key: string, value: string | number) => {
+    // 1. Update local state
     const updatedAnswers = { ...answers, [key]: value }
     setAnswers(updatedAnswers)
 
+    // 2. Move to next question OR Submit
     if (index < questions.length - 1) {
       setIndex(index + 1)
-      setAgeInput("") 
+      setAgeInput("") // Clear input for safety
     } else {
       submitSurvey(updatedAnswers)
     }
   }
 
+  // Handler for Button Options
   const handleOptionClick = (value: string) => {
     if (isSubmitting) return
     nextStep(current.id, value)
   }
 
+  // Handler for Number Input (Age)
   const handleAgeSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting) return
+    
     const val = parseInt(ageInput)
     if (!val || (current.min && val < current.min) || (current.max && val > current.max)) {
       alert(`Please enter a valid age between ${current.min} and ${current.max}`)
@@ -127,6 +150,7 @@ const Survey = () => {
     nextStep(current.id, val)
   }
 
+  // === RENDER LOADING STATE ===
   if (isSubmitting) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
@@ -137,10 +161,12 @@ const Survey = () => {
     )
   }
 
+  // === RENDER SURVEY ===
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-xl w-full bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
         
+        {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="bg-indigo-600 p-2 rounded-lg">
             <Activity className="text-white w-5 h-5" />
@@ -150,6 +176,7 @@ const Survey = () => {
           </h1>
         </div>
 
+        {/* Progress Bar */}
         <div className="w-full bg-slate-100 h-1.5 mb-6 rounded-full overflow-hidden">
           <div 
             className="bg-indigo-600 h-full transition-all duration-300" 
@@ -157,15 +184,20 @@ const Survey = () => {
           ></div>
         </div>
 
+        {/* Question Counter */}
         <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">
           Question {index + 1} / {questions.length}
         </p>
 
+        {/* Question Label */}
         <h2 className="text-2xl font-extrabold text-slate-900 mb-8">
           {current.label}
         </h2>
 
+        {/* Dynamic Inputs */}
         <div className="space-y-3">
+          
+          {/* CASE 1: Number Input (Age) */}
           {current.type === "number" ? (
             <form onSubmit={handleAgeSubmit} className="space-y-4">
               <input
@@ -184,6 +216,8 @@ const Survey = () => {
               </button>
             </form>
           ) : (
+            
+            /* CASE 2: Button Options */
             <div className="grid gap-3">
               {current.options?.map((option) => (
                 <button
@@ -197,6 +231,7 @@ const Survey = () => {
               ))}
             </div>
           )}
+
         </div>
       </div>
     </div>
