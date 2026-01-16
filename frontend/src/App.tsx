@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, useLocation } from "react-router-dom"
 import LandingPage from "./pages/landingPage"
 import Login from "./pages/login"
 import Signup from "./pages/signup"
@@ -9,9 +9,12 @@ import Navbar from "./components/navbar"
 import Footer from "./components/footer"
 
 export default function App() {
+  const location = useLocation()
+  const isSurveyOrResult = location.pathname === '/survey' || location.pathname.startsWith('/results')
+
   return (
     <>
-      <Navbar />
+      {!isSurveyOrResult && <Navbar />}
 
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -22,7 +25,7 @@ export default function App() {
         <Route path="/results/:id" element={<Results />} />
       </Routes>
 
-      <Footer />
+      {!isSurveyOrResult && <Footer />}
     </>
   )
 }
