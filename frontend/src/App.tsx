@@ -5,26 +5,22 @@ import Signup from "./pages/signup"
 import Profile from "./pages/profile"
 import Survey from "./pages/survey"
 import Results from "./pages/results"
-import Navbar from "./components/navbar"
-import Footer from "./components/footer"
+import MainLayout from "./components/layout"
 
 export default function App() {
   return (
-    <>
     <Routes>
+      {/* Landing page ONLY */}
       <Route path="/" element={<LandingPage />} />
-    </Routes>
-      <Navbar />
 
-      <Routes>
+      {/* Pages WITH Navbar + Footer */}
+      <Route element={<MainLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/survey" element={<Survey />} />
         <Route path="/results/:id" element={<Results />} />
-      </Routes>
-
-      <Footer />
-    </>
+      </Route>
+    </Routes>
   )
 }
