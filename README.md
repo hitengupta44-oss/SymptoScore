@@ -68,6 +68,9 @@ This approach ensures:
 
 The platform follows a **modular, service‑oriented architecture** separating user‑facing systems from the machine‑learning inference layer.
 
+## flow chart for the working of the application 
+<img width="1920" height="500" alt="1 (3)" src="https://github.com/user-attachments/assets/e90e2c24-3ad5-4929-92a1-0c559ba1f343" />
+
 ### Frontend Application
 
 * Built using a modern React‑based stack
@@ -154,7 +157,15 @@ For users identified with high estimated risk, the system may suggest commonly r
 * Modern React‑based frontend
 
 ---
+## Preview
+<img width="1919" height="1127" alt="image" src="https://github.com/user-attachments/assets/bd8bdf65-91b5-470c-89df-769a08f60a18" />
+This is what the user will be previewed with after completing the questionnaire.
 
+## Key points
+  1. Risk score for multiple chronic diseases
+  2. Protective factors : Factors influced the given Diagnosis* the least.
+  3. Risk factors : Factors influced the given Diagnosis* the most.
+  
 ## Impact
 
 By combining explainable probabilistic AI with a secure, scalable, and user‑centric system design, SymptoScore enables early health risk awareness, supports preventive healthcare behavior, and demonstrates a production‑ready approach to responsible health‑tech deployment.
