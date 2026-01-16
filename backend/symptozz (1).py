@@ -12,13 +12,13 @@ recs = pd.read_excel(r"C:\Users\Mansha\Downloads\recommendationsdoc_precise_deta
 diseases = ["Diabetes","HeartDisease","Hypertension","CKD","Asthma","Dyslipidemia","Anemia"]
 
 disease_features = {
-    "Diabetes":["SugarLevel","FrequentUrination","ExcessiveThirst","FamilyHistoryDiabetes"],
-    "HeartDisease":["ChestPain","BloodPressure","Smoking","FamilyHistoryHeart"],
-    "Hypertension":["BloodPressure","SaltIntake","StressLevel"],
-    "CKD":["SwellingAnkles","FrequentUrination"],
-    "Asthma":["Wheezing","Breathlessness","Cough"],
-    "Dyslipidemia":["DietQuality","PhysicalActivity","Smoking"],
-    "Anemia":["PaleSkin","Fatigue","WeightLoss"]
+    "Diabetes":["SugarLevel","FrequentUrination","ExcessiveThirst","FamilyHistoryDiabetes","WeightLoss","Fatigue"],
+    "HeartDisease":["ChestPain","BloodPressure","Smoking","FamilyHistoryHeart","Alcohol"],
+    "Hypertension":["BloodPressure","SaltIntake","StressLevel","Headache","PhysicalActivity"],
+    "CKD":["SwellingAnkles","FrequentUrination","Fatigue","BloodPressure","PaleSkin"],
+    "Asthma":["Wheezing","Breathlessness","Cough","Smoking","Fatigue"],
+    "Dyslipidemia":["DietQuality","PhysicalActivity","Smoking","Alcohol","BloodPressure","StressLevel"],
+    "Anemia":["PaleSkin","Fatigue","WeightLoss","Dizziness","LossOfAppetite"]
 }
 
 # ================= ENCODING =================
