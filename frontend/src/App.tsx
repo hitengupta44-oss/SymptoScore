@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, useLocation } from "react-router-dom"
 import LandingPage from "./pages/landingPage"
 import Login from "./pages/login"
 import Signup from "./pages/signup"
@@ -8,6 +8,9 @@ import Results from "./pages/results"
 import MainLayout from "./components/layout"
 
 export default function App() {
+  const location = useLocation()
+  const isSurveyOrResult = location.pathname === '/survey' || location.pathname.startsWith('/results')
+
   return (
     <Routes>
       {/* Landing page ONLY */}
