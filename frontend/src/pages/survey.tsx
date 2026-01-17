@@ -38,7 +38,7 @@ const Survey = () => {
 
   // State Management
   const [index, setIndex] = useState<number>(0)
-  const [ageInput, setAgeInput] = useState<string>("")
+  const [ageInput, setAgeInput] = useState<number>()
   const [answers, setAnswers] = useState<SurveyAnswers>({})
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true)
@@ -61,7 +61,7 @@ const Survey = () => {
 
         if (profile?.age) {
           // Pre-fill the age input field (user can still change it)
-          setAgeInput(String(profile.age))
+          setAgeInput(Number(profile.age))
         }
       } catch (error) {
         console.error("Error fetching profile age:", error)
@@ -90,7 +90,7 @@ const Survey = () => {
       console.log(finalData)
 
       // Rebuild data in the same sequence as questions
-      const orderedData: Record<string, string | number> = {}
+      const orderedData: Record<string, number | string> = {}
       for (const q of questions) {
         if (finalData[q.id] !== undefined) {
           orderedData[q.id] = finalData[q.id]
