@@ -97,7 +97,7 @@ const HealthTrendChart = ({ reports }: { reports: HealthReport[] }) => {
       </div>
 
       {/* Recharts Area Chart */}
-      <div className="h-[200px] w-full -ml-2">
+      <div className="h-50 w-full -ml-2">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
@@ -271,8 +271,8 @@ const Profile = () => {
           <aside className="lg:col-span-4 space-y-6">
 
             {/* User Card */}
-            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
-              <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl font-black text-indigo-600 flex-shrink-0 shadow-inner">
+            <div className="bg-white p-6 rounded-4xl shadow-sm border border-slate-100 flex items-center gap-4">
+              <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl font-black text-indigo-600 shrink-0 shadow-inner">
                 {profile?.name ? profile.name.charAt(0).toUpperCase() : "U"}
               </div>
               <div>
@@ -282,7 +282,7 @@ const Profile = () => {
             </div>
 
             {/* CHART CARD (With Recharts) */}
-            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div className="bg-white p-6 rounded-4xl shadow-sm border border-slate-100">
               <HealthTrendChart reports={reports} />
             </div>
 
@@ -300,7 +300,7 @@ const Profile = () => {
 
             {reports.length === 0 ? (
               // EMPTY STATE
-              <div className="bg-white rounded-[2rem] border border-dashed border-slate-300 p-12 text-center">
+              <div className="bg-white rounded-4xl border border-dashed border-slate-300 p-12 text-center">
                 <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Activity className="w-8 h-8" />
                 </div>

@@ -100,7 +100,7 @@ const Signup = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="w-full max-w-lg bg-white rounded-[2rem] shadow-xl p-8 md:p-12 border border-slate-100">
+      <div className="w-full max-w-lg bg-white rounded-4xl shadow-xl p-8 md:p-12 border border-slate-100">
         
         {/* Header */}
         <div className="mb-10 text-center">

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import React, { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import {
     Activity,
@@ -107,9 +107,9 @@ const Landing = () => {
             {/* --- HERO SECTION --- */}
             <section className="relative h-screen flex justify-center items-center pt-32 pb-24 px-6 overflow-hidden">
                 {/* Cleaner Background: Just subtle Slate/Indigo meshes */}
-                <div className="absolute top-0 left-0 w-full h-[800px] z-0 pointer-events-none opacity-30">
-                    <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-slate-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
-                    <div className="absolute top-[10%] right-[10%] w-[400px] h-[400px] bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
+                <div className="absolute top-0 left-0 w-full h-200 z-0 pointer-events-none opacity-30">
+                    <div className="absolute top-[-10%] left-[20%] w-125 h-125 bg-slate-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+                    <div className="absolute top-[10%] right-[10%] w-100 h-100 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
                 </div>
 
                 <div className="max-w-4xl mx-auto text-center relative z-10">
@@ -163,10 +163,10 @@ const Landing = () => {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 grid-rows-3 gap-6 h-auto lg:h-[800px]">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 grid-rows-3 gap-6 h-auto lg:h-200">
 
                         {/* 1. Large Main Feature (Clean Gradient) */}
-                        <GlowCard className="md:col-span-2 md:row-span-2 p-8 flex flex-col justify-between bg-gradient-to-b from-white to-slate-50">
+                        <GlowCard className="md:col-span-2 md:row-span-2 p-8 flex flex-col justify-between bg-liner-to-b from-white to-slate-50">
                             <div>
                                 <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-md">
                                     <Brain className="text-white w-6 h-6" />
@@ -318,4 +318,4 @@ const Landing = () => {
     )
 }
 
-export default Landing  
+export default Landing

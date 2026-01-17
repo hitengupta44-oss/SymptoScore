@@ -146,7 +146,7 @@ const Results = () => {
   return (
     <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
       {/* --- SIDEBAR --- */}
-      <aside className="w-[340px] bg-white border-r border-slate-100 flex flex-col z-20 shadow-xl shadow-slate-200/50">
+      <aside className="w-85 bg-white border-r border-slate-100 flex flex-col z-20 shadow-xl shadow-slate-200/50">
         <div className="p-8 pb-4">
           <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 pl-2">Screening Panel ({reportData.report.length})</h3>
         </div>
@@ -202,12 +202,12 @@ const Results = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
               {/* Left: Gauge */}
-              <div className="lg:col-span-5 bg-white rounded-[2rem] p-10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] border border-slate-100 flex items-center justify-center">
+              <div className="lg:col-span-5 bg-white rounded-4xl p-10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] border border-slate-100 flex items-center justify-center">
                 <Gauge value={Math.round(selectedItem.risk)} label={config.text} color={config.color} />
               </div>
 
               {/* Right: SHAP Analysis */}
-              <div className="lg:col-span-7 bg-white rounded-[2rem] p-10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] border border-slate-100">
+              <div className="lg:col-span-7 bg-white rounded-4xl p-10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] border border-slate-100">
                 <div className="flex items-center gap-3 mb-8">
                   <Activity className="text-slate-400" />
                   <h3 className="text-lg font-bold text-slate-900">Why this result? (SHAP Analysis)</h3>
@@ -254,7 +254,7 @@ const Results = () => {
             </div>
 
             {/* Bottom: Recommendations */}
-            <div className="bg-[#eff6ff] rounded-[2rem] p-10 border border-blue-100 relative overflow-hidden">
+            <div className="bg-[#eff6ff] rounded-4xl p-10 border border-blue-100 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-10 opacity-5"><Stethoscope size={200} /></div>
               <div className="flex items-center gap-3 mb-8 relative z-10">
                 <Stethoscope className="text-blue-600" />
@@ -275,7 +275,7 @@ const Results = () => {
 
             {/* AI Summary Section */}
             {reportData.ai_summary && (
-              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-[2rem] p-10 border border-indigo-100 relative overflow-hidden">
+              <div className="bg-liner-to-br from-indigo-50 to-purple-50 rounded-4xl p-10 border border-indigo-100 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-10 opacity-5"><Activity size={200} /></div>
                 <div className="flex items-center gap-3 mb-6 relative z-10">
                   <div className="bg-indigo-600 p-2 rounded-xl">
@@ -307,7 +307,7 @@ const Results = () => {
 
             {/* Disclaimer Banner */}
             <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex items-start gap-4">
-              <div className="bg-amber-100 p-2 rounded-xl flex-shrink-0">
+              <div className="bg-amber-100 p-2 rounded-xl shrink-0">
                 <AlertCircle className="w-5 h-5 text-amber-600" />
               </div>
               <div>

@@ -219,7 +219,7 @@ const Survey = () => {
           {/* Decorative background blob */}
           <div className="absolute -top-20 -right-20 w-64 h-64 bg-slate-50 rounded-full opacity-50 pointer-events-none" />
 
-          <div className="relative z-10 min-h-[300px] flex flex-col justify-center">
+          <div className="relative z-10 min-h-75 flex flex-col justify-center">
             <h2 className="text-3xl font-bold text-slate-900 mb-12 leading-tight">
               {current.label}
             </h2>
