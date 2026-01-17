@@ -3,6 +3,22 @@ import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { Activity, ArrowRight, Loader2 } from "lucide-react"
 
+// --- HELPER: Get the correct URL for redirects ---
+const getURL = () => {
+  let url =
+    import.meta.env.VITE_SITE_URL ?? // Set this to your production URL in Vercel settings if needed
+    import.meta.env.VITE_VERCEL_URL ?? // Automatically set by Vercel
+    'http://localhost:3000/' // Fallback for local development
+
+  // Make sure it includes `https://` if it's not localhost
+  url = url.includes('http') ? url : `https://${url}`
+  
+  // Make sure it has a trailing slash
+  url = url.charAt(url.length - 1) === '/' ? url : `${url}/`
+  
+  return url
+}
+
 // Google Icon
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -32,7 +48,7 @@ const Signup = () => {
       
       if (user) {
         // User is logged in. 
-        // OPTIONAL: Check if they already have a profile row in Supabase
+        // Check if they already have a profile row in Supabase
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -56,13 +72,15 @@ const Signup = () => {
     checkUserAndProfile()
   }, [navigate])
 
-  // 2. Google Login Trigger
+  // 2. Google Login Trigger (FIXED)
   const handleGoogleSignup = async () => {
+    const redirectUrl = `${getURL()}signup` // Dynamically builds correct URL
+    console.log("Redirecting to:", redirectUrl)
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        // Return to this page to check if we need to fill info
-        redirectTo: window.location.origin + "/signup",
+        redirectTo: redirectUrl,
       },
     })
     if (error) console.error(error.message)
@@ -100,7 +118,7 @@ const Signup = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="w-full max-w-lg bg-white rounded-4xl shadow-xl p-8 md:p-12 border border-slate-100">
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl p-8 md:p-12 border border-slate-100">
         
         {/* Header */}
         <div className="mb-10 text-center">
