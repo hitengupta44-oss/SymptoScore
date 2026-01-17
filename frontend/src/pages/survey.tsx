@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronRight, Loader2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
@@ -41,6 +41,37 @@ const Survey = () => {
   const [ageInput, setAgeInput] = useState<string>("")
   const [answers, setAnswers] = useState<SurveyAnswers>({})
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true)
+
+  // Auto-fill age from profile
+  useEffect(() => {
+    const fetchProfileAge = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          setIsLoadingProfile(false)
+          return
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("age")
+          .eq("id", user.id)
+          .single()
+
+        if (profile?.age) {
+          // Pre-fill the age input field (user can still change it)
+          setAgeInput(String(profile.age))
+        }
+      } catch (error) {
+        console.error("Error fetching profile age:", error)
+      } finally {
+        setIsLoadingProfile(false)
+      }
+    }
+
+    fetchProfileAge()
+  }, [])
 
   const current = questions[index]
 
@@ -57,12 +88,21 @@ const Survey = () => {
         return
       }
       console.log(finalData)
+
+      // Rebuild data in the same sequence as questions
+      const orderedData: Record<string, string | number> = {}
+      for (const q of questions) {
+        if (finalData[q.id] !== undefined) {
+          orderedData[q.id] = finalData[q.id]
+        }
+      }
+
       // 2. Call Your Python API
       // Ensure your Flask backend is running on this port
       const response = await fetch("http://127.0.0.1:5000/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(finalData),
+        body: JSON.stringify(orderedData),
       })
 
       if (!response.ok) {
@@ -136,6 +176,15 @@ const Survey = () => {
   }
 
   // === RENDER LOADING STATE ===
+  if (isLoadingProfile) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+        <h2 className="text-xl font-bold text-slate-900">Loading your profile...</h2>
+      </div>
+    )
+  }
+
   if (isSubmitting) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">

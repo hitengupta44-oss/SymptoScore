@@ -1,16 +1,23 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { 
-  User, 
-  Calendar, 
-  ChevronRight, 
-  Plus, 
-  Activity, 
-  Clock, 
+import {
+  Calendar,
+  ChevronRight,
+  Plus,
+  Activity,
+  Clock,
   TrendingUp,
+  TrendingDown,
   Loader2
 } from "lucide-react"
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts"
 
 // --- TYPES ---
 type ProfileData = {
@@ -28,28 +35,124 @@ type AnalysisReport = {
 type HealthReport = {
   id: string
   created_at: string
-  // matches the JSON structure we saved earlier
   analysis_result: {
     report: AnalysisReport[]
   }
 }
 
-// --- SUB-COMPONENT: REPORT CARD ---
-const ReportCard = ({ report, onClick }: { report: HealthReport; onClick: () => void }) => {
-  // 1. Find the highest risk to display as a "Preview"
-  const topRisk = report.analysis_result?.report?.reduce((prev, current) => 
-    (prev.risk > current.risk) ? prev : current
-  , report.analysis_result.report[0])
+// --- HELPER: FORMAT DATE ---
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
 
-  // Format Date (e.g., "Oct 24, 2023")
-  const dateStr = new Date(report.created_at).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  })
+// --- COMPONENT: TREND CHART (Using Recharts) ---
+const HealthTrendChart = ({ reports }: { reports: HealthReport[] }) => {
+  const data = useMemo(() => {
+    // Clone and reverse so graph goes Left (Oldest) -> Right (Newest)
+    const sorted = [...reports].reverse()
+
+    return sorted.map(r => {
+      const totalRisk = r.analysis_result.report.reduce((acc, curr) => acc + curr.risk, 0)
+      const avgRisk = totalRisk / r.analysis_result.report.length
+      // Health Score = 100 - Avg Risk (Higher is better)
+      return {
+        date: formatDate(r.created_at),
+        score: Math.round(100 - avgRisk),
+        fullDate: new Date(r.created_at).toLocaleDateString()
+      }
+    })
+  }, [reports])
+
+  // Need at least 2 points to draw a line
+  if (data.length < 2) {
+    return (
+      <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-sm border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/50">
+        <Activity className="w-8 h-8 mb-3 opacity-50" />
+        <span className="font-medium">Complete at least 2 surveys to unlock trends</span>
+      </div>
+    )
+  }
+
+  // Calculate Trend
+  const startScore = data[0].score
+  const currentScore = data[data.length - 1].score
+  const difference = currentScore - startScore
+  const isPositive = difference >= 0
+
+  // Dynamic Colors based on trend
+  const color = isPositive ? "#10b981" : "#f43f5e" // Emerald vs Rose
 
   return (
-    <button 
+    <div className="w-full">
+      {/* Chart Header */}
+      <div className="flex justify-between items-end mb-6 px-2">
+        <div>
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Wellness Score</p>
+          <h3 className="text-4xl font-black text-slate-900">{currentScore}<span className="text-lg text-slate-400 font-medium ml-1">/100</span></h3>
+        </div>
+        <div className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 ${isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+          {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+          {Math.abs(difference)}% {isPositive ? "Improvement" : "Drop"}
+        </div>
+      </div>
+
+      {/* Recharts Area Chart */}
+      <div className="h-[200px] w-full -ml-2">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={color} stopOpacity={0.2} />
+                <stop offset="95%" stopColor={color} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+
+            <XAxis
+              dataKey="date"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
+              dy={10}
+            />
+
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#fff',
+                borderRadius: '12px',
+                border: 'none',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+              }}
+              itemStyle={{ color: '#1e293b', fontWeight: 'bold' }}
+              labelStyle={{ color: '#64748b', marginBottom: '4px', fontSize: '12px' }}
+              cursor={{ stroke: '#cbd5e1', strokeWidth: 2, strokeDasharray: '4 4' }}
+            />
+
+            <Area
+              type="monotone"
+              dataKey="score"
+              stroke={color}
+              strokeWidth={3}
+              fillOpacity={1}
+              fill="url(#colorScore)"
+              animationDuration={1500}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  )
+}
+
+// --- SUB-COMPONENT: REPORT CARD ---
+const ReportCard = ({ report, onClick }: { report: HealthReport; onClick: () => void }) => {
+  const topRisk = report.analysis_result?.report?.reduce((prev, current) =>
+    (prev.risk > current.risk) ? prev : current
+    , report.analysis_result.report[0])
+
+  const dateStr = formatDate(report.created_at)
+
+  return (
+    <button
       onClick={onClick}
       className="w-full bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all group text-left"
     >
@@ -58,10 +161,9 @@ const ReportCard = ({ report, onClick }: { report: HealthReport; onClick: () => 
           <Calendar className="w-3 h-3" />
           {dateStr}
         </div>
-        <div className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 ${
-          topRisk?.risk > 50 ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
-        }`}>
-          {topRisk?.risk > 50 ? 'High Risk Detected' : 'All Good'}
+        <div className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 ${topRisk?.risk > 50 ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
+          }`}>
+          {topRisk?.risk > 50 ? 'High Risk' : 'Optimal'}
         </div>
       </div>
 
@@ -73,9 +175,8 @@ const ReportCard = ({ report, onClick }: { report: HealthReport; onClick: () => 
           </h4>
         </div>
         <div className="text-right">
-          <span className={`text-2xl font-black ${
-             topRisk?.risk > 50 ? 'text-red-500' : 'text-indigo-500'
-          }`}>
+          <span className={`text-2xl font-black ${topRisk?.risk > 50 ? 'text-red-500' : 'text-indigo-500'
+            }`}>
             {topRisk?.risk}%
           </span>
           <p className="text-xs text-slate-400 font-medium">Risk Score</p>
@@ -100,7 +201,6 @@ const Profile = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Get Current User
         const { data: { user } } = await supabase.auth.getUser()
 
         if (!user) {
@@ -108,21 +208,18 @@ const Profile = () => {
           return
         }
 
-        // 2. Fetch Profile Data
         const profileReq = supabase
           .from("profiles")
           .select("name, age, gender")
           .eq("id", user.id)
           .single()
 
-        // 3. Fetch Health Reports (Surveys)
         const reportsReq = supabase
           .from("health_reports")
           .select("id, created_at, analysis_result")
           .eq("user_id", user.id)
-          .order('created_at', { ascending: false }) // Newest first
+          .order('created_at', { ascending: false })
 
-        // Run both requests in parallel
         const [profileRes, reportsRes] = await Promise.all([profileReq, reportsReq])
 
         if (profileRes.error) console.error("Profile Error:", profileRes.error)
@@ -151,15 +248,15 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-10">
-      <div className="max-w-5xl mx-auto space-y-8">
-        
+      <div className="max-w-6xl mx-auto space-y-8">
+
         {/* --- HEADER --- */}
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-black text-slate-900">Dashboard</h1>
             <p className="text-slate-500">Welcome back, {profile?.name?.split(' ')[0] || 'User'}</p>
           </div>
-          <button 
+          <button
             onClick={() => navigate("/survey")}
             className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-full font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95"
           >
@@ -169,51 +266,36 @@ const Profile = () => {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* --- LEFT COLUMN: USER INFO --- */}
+
+          {/* --- LEFT COLUMN: USER INFO & CHARTS --- */}
           <aside className="lg:col-span-4 space-y-6">
-            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 text-center">
-              <div className="w-24 h-24 mx-auto bg-slate-100 rounded-full flex items-center justify-center mb-4 text-4xl">
-                 🤖
+
+            {/* User Card */}
+            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
+              <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl font-black text-indigo-600 flex-shrink-0 shadow-inner">
+                {profile?.name ? profile.name.charAt(0).toUpperCase() : "U"}
               </div>
-              <h2 className="text-xl font-bold text-slate-900">{profile?.name}</h2>
-              <p className="text-slate-400 text-sm mb-6">{profile?.gender} • {profile?.age} years old</p>
-              
-              <div className="grid grid-cols-2 gap-4 border-t border-slate-50 pt-6">
-                <div className="text-center">
-                  <span className="block text-2xl font-black text-slate-900">{reports.length}</span>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Checkups</span>
-                </div>
-                <div className="text-center border-l border-slate-50">
-                  <span className="block text-2xl font-black text-green-500">
-                    {reports.length > 0 ? "Active" : "-"}
-                  </span>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Status</span>
-                </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">{profile?.name}</h2>
+                <p className="text-slate-400 text-sm font-medium capitalize">{profile?.gender} • {profile?.age} yrs</p>
               </div>
             </div>
 
-            {/* Quick Stats / Info Widget */}
-            <div className="bg-indigo-900 p-6 rounded-[2rem] shadow-lg text-white relative overflow-hidden">
-               <div className="relative z-10">
-                 <div className="bg-white/10 w-fit p-2 rounded-lg mb-4">
-                   <TrendingUp className="w-5 h-5 text-indigo-300" />
-                 </div>
-                 <h3 className="font-bold text-lg mb-1">Health Tip</h3>
-                 <p className="text-indigo-200 text-sm leading-relaxed">
-                   Regular screenings can detect issues early. Great job keeping track of your history!
-                 </p>
-               </div>
-               {/* Decorative Circle */}
-               <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl"></div>
+            {/* CHART CARD (With Recharts) */}
+            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+              <HealthTrendChart reports={reports} />
             </div>
+
           </aside>
 
           {/* --- RIGHT COLUMN: HISTORY LIST --- */}
           <main className="lg:col-span-8">
             <div className="flex items-center gap-2 mb-6">
-              <Clock className="w-5 h-5 text-slate-400" />
+              <Clock className="w-5 h-5 text-indigo-600" />
               <h3 className="text-lg font-bold text-slate-700">Assessment History</h3>
+              <span className="ml-auto text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
+                {reports.length} Total
+              </span>
             </div>
 
             {reports.length === 0 ? (
@@ -226,7 +308,7 @@ const Profile = () => {
                 <p className="text-slate-500 max-w-xs mx-auto mb-6">
                   Take your first AI-powered health screening to get your SymptoScore.
                 </p>
-                <button 
+                <button
                   onClick={() => navigate("/survey")}
                   className="text-indigo-600 font-bold hover:underline"
                 >
@@ -237,9 +319,9 @@ const Profile = () => {
               // LIST OF CARDS
               <div className="grid md:grid-cols-2 gap-4">
                 {reports.map((report) => (
-                  <ReportCard 
-                    key={report.id} 
-                    report={report} 
+                  <ReportCard
+                    key={report.id}
+                    report={report}
                     onClick={() => navigate(`/results/${report.id}`)}
                   />
                 ))}

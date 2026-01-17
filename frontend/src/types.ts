@@ -37,4 +37,5 @@ export interface DiseaseReport {
 export interface ApiResponse {
     report: DiseaseReport[]
     status: string
+    ai_summary?: string
 }

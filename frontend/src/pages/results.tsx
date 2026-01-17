@@ -74,6 +74,7 @@ const Results = () => {
   useEffect(() => {
     const fetchReport = async () => {
       if (location.state?.report) {
+        console.log("Report data received:", location.state.report)
         setReportData(location.state.report)
         setSelectedDisease(location.state.report.report[0].disease)
         setLoading(false)
@@ -109,6 +110,21 @@ const Results = () => {
   // -- Helpers --
   const formatName = (str: string) => str.replace(/([A-Z])/g, ' $1').trim()
 
+  // Parse markdown-like formatting from Gemini response
+  const parseMarkdown = (text: string): string => {
+    return text
+      // Bold: **text** or __text__
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/__(.+?)__/g, '<strong>$1</strong>')
+      // Italic: *text* or _text_
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/_(.+?)_/g, '<em>$1</em>')
+      // Numbered lists: 1. item
+      .replace(/^(\d+)\.\s+(.+)$/gm, '<span class="font-semibold text-indigo-700">$1.</span> $2')
+      // Bullet points: - item or * item
+      .replace(/^[-*]\s+(.+)$/gm, '<span class="text-indigo-500 mr-2">•</span>$1')
+  }
+
   const getRiskConfig = (risk: number) => {
     if (risk >= 50) return { color: "#ef4444", text: "High Risk", bg: "bg-red-50", border: "border-red-500" } // Red
     if (risk >= 20) return { color: "#f97316", text: "Moderate Risk", bg: "bg-orange-50", border: "border-orange-500" } // Orange
@@ -132,12 +148,6 @@ const Results = () => {
       {/* --- SIDEBAR --- */}
       <aside className="w-[340px] bg-white border-r border-slate-100 flex flex-col z-20 shadow-xl shadow-slate-200/50">
         <div className="p-8 pb-4">
-          <div className="flex items-center gap-3 mb-10 text-blue-600">
-            <div className="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-200">
-              <Activity size={24} strokeWidth={3} />
-            </div>
-            <span className="text-2xl font-black tracking-tighter text-slate-900">SymptoScore</span>
-          </div>
           <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 pl-2">Screening Panel ({reportData.report.length})</h3>
         </div>
 
@@ -260,6 +270,54 @@ const Results = () => {
                     <p className="font-bold text-slate-700 leading-snug">{rec.trim()}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* AI Summary Section */}
+            {reportData.ai_summary && (
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-[2rem] p-10 border border-indigo-100 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-10 opacity-5"><Activity size={200} /></div>
+                <div className="flex items-center gap-3 mb-6 relative z-10">
+                  <div className="bg-indigo-600 p-2 rounded-xl">
+                    <Activity className="text-white w-5 h-5" />
+                  </div>
+                  <h3 className="text-lg font-bold text-indigo-900">AI Health Analysis</h3>
+                  <span className="ml-auto text-xs font-bold text-indigo-500 bg-indigo-100 px-3 py-1 rounded-full">Powered by Gemini</span>
+                </div>
+
+                <div className="relative z-10 bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-indigo-100">
+                  <div className="prose prose-slate prose-sm max-w-none space-y-2">
+                    {reportData.ai_summary.split('\n').map((line, i) => (
+                      line.trim() && (
+                        <p
+                          key={i}
+                          className="text-slate-700 leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: parseMarkdown(line) }}
+                        />
+                      )
+                    ))}
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs text-indigo-400 relative z-10">
+                  ⚠️ This AI-generated summary is for informational purposes only and should not replace professional medical advice.
+                </p>
+              </div>
+            )}
+
+            {/* Disclaimer Banner */}
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex items-start gap-4">
+              <div className="bg-amber-100 p-2 rounded-xl flex-shrink-0">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <h4 className="font-bold text-amber-800 mb-1">Important Disclaimer</h4>
+                <p className="text-sm text-amber-700">
+                  SymptoScore is a health screening and recommendation tool designed to provide general health insights.
+                  It is <span className="font-semibold">not a medical diagnosis</span>. The results shown here should not replace
+                  professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider
+                  for any health concerns or before making decisions about your health.
+                </p>
               </div>
             </div>
 
