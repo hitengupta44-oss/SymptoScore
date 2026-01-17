@@ -5,27 +5,25 @@ import Signup from "./pages/signup"
 import Profile from "./pages/profile"
 import Survey from "./pages/survey"
 import Results from "./pages/results"
-import Navbar from "./components/navbar"
-import Footer from "./components/footer"
+import MainLayout from "./components/layout"
 
 export default function App() {
   const location = useLocation()
   const isSurveyOrResult = location.pathname === '/survey' || location.pathname.startsWith('/results')
 
   return (
-    <>
-      {!isSurveyOrResult && <Navbar />}
+    <Routes>
+      {/* Landing page ONLY */}
+      <Route path="/" element={<LandingPage />} />
 
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
+      {/* Pages WITH Navbar + Footer */}
+      <Route element={<MainLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/survey" element={<Survey />} />
         <Route path="/results/:id" element={<Results />} />
-      </Routes>
-
-      {!isSurveyOrResult && <Footer />}
-    </>
+      </Route>
+    </Routes>
   )
 }
