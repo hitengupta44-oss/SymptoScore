@@ -38,7 +38,7 @@ const Survey = () => {
 
   // State Management
   const [index, setIndex] = useState<number>(0)
-  const [ageInput, setAgeInput] = useState<number>()
+  const [ageInput, setAgeInput] = useState<number | undefined>()
   const [answers, setAnswers] = useState<SurveyAnswers>({})
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true)
@@ -150,7 +150,7 @@ const Survey = () => {
     // 2. Move to next question OR Submit
     if (index < questions.length - 1) {
       setIndex(index + 1)
-      setAgeInput("")
+      setAgeInput(undefined)
     } else {
       submitSurvey(updatedAnswers)
     }
@@ -167,7 +167,7 @@ const Survey = () => {
     e.preventDefault()
     if (isSubmitting) return
 
-    const val = parseInt(ageInput)
+    const val = ageInput
     if (!val || (current.min && val < current.min) || (current.max && val > current.max)) {
       alert(`Please enter a valid age between ${current.min} and ${current.max}`)
       return
@@ -231,8 +231,8 @@ const Survey = () => {
                 <form onSubmit={handleAgeSubmit} className="space-y-6">
                   <input
                     type="number"
-                    value={ageInput}
-                    onChange={(e) => setAgeInput(e.target.value)}
+                    value={ageInput ?? ""}
+                    onChange={(e) => setAgeInput(e.target.value ? Number(e.target.value) : undefined)}
                     placeholder="Type your answer..."
                     className="w-full bg-slate-50 border-2 border-slate-100 focus:border-blue-500 rounded-2xl px-8 py-6 text-xl font-bold outline-none transition-all placeholder:text-slate-300 text-slate-800"
                     autoFocus
